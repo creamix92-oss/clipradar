@@ -1,0 +1,862 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClipRadar — Clipper con IA & Detección Acústica</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'><rect width='30' height='30' rx='8' fill='%230a0a10'/><circle cx='15' cy='15' r='9' fill='none' stroke='%23c6ff3d' stroke-width='3'/><path d='M15 15 23 8' stroke='%23c6ff3d' stroke-width='3' stroke-linecap='round'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0c0d12; --panel:#15171f; --panel2:#1c1f2a; --line:#2a2e3d; --text:#eef0f6; --muted:#8d93a8;
+  --accent:#c6ff3d; --accent-ink:#0c0d12; --live:#ff4d5e; --warn:#ffb020; --ok:#3ddc97; --vip:#e5a93b; --radius:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+button,input,select{font:inherit;color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 16px 80px}
+header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.logo{font-size:22px;font-weight:800;letter-spacing:-.02em}
+.logo span{color:var(--accent)}
+.user-bar{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap}
+.pill{font-size:12px;padding:5px 12px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);color:var(--muted);white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.pill.ok{color:var(--ok)} .pill.bad{color:var(--warn)} .pill.vip{color:var(--vip);border-color:rgba(229,169,59,.4);background:rgba(229,169,59,.1)}
+.pill.trial{color:var(--accent);border-color:rgba(198,255,61,.4);background:rgba(198,255,61,.1)}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:18px 0 8px;font-weight:700}
+h2:first-child{margin-top:0}
+.urlrow{display:flex;gap:8px;flex-wrap:wrap}
+.urlrow input[type=url]{flex:1 1 320px;min-width:0;padding:14px 16px;border-radius:12px;border:1px solid var(--line);background:var(--bg);font-size:16px;outline:none}
+.urlrow input[type=url]:focus,.tags:focus-within,.field input:focus,.field select:focus{border-color:var(--accent)}
+.btn{border:1px solid var(--line);background:var(--panel2);border-radius:12px;padding:10px 14px;cursor:pointer;font-weight:600;white-space:nowrap;transition:border-color .15s,background .15s}
+a.btn{color:inherit;text-decoration:none;display:inline-block}
+.btn:hover{border-color:#454b63}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);padding:14px 22px;font-size:16px}
+.btn.primary:disabled{opacity:.5;cursor:wait}
+.btn.vip-btn{background:linear-gradient(135deg,#e5a93b,#f5c35b);color:#111;border:0;font-weight:700}
+.btn.small{padding:6px 10px;font-size:13px;border-radius:9px}
+.btn.danger:hover{border-color:var(--live);color:var(--live)}
+.seg{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:3px}
+.seg button{border:0;background:none;padding:8px 14px;border-radius:9px;cursor:pointer;color:var(--muted);font-weight:600}
+.seg button.on{background:var(--panel2);color:var(--text)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--bg);border-radius:99px;padding:8px 14px;cursor:pointer;user-select:none;font-weight:600;color:var(--muted)}
+.chip.on{background:rgba(198,255,61,.12);border-color:var(--accent);color:var(--text)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:8px;border:1px solid var(--line);background:var(--bg);border-radius:12px;cursor:text}
+.tag{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:4px 6px 4px 10px;display:inline-flex;gap:6px;align-items:center}
+.tag button{border:0;background:none;color:var(--muted);cursor:pointer;padding:0 4px;font-size:16px;line-height:1}
+.tags input{flex:1 1 180px;min-width:120px;border:0;background:none;outline:none;padding:6px}
+.hint{color:var(--muted);font-size:13px;margin-top:6px}
+details.adv{margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+details.adv summary{cursor:pointer;color:var(--muted);font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;margin-top:12px}
+.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+.field input,.field select{width:100%;padding:9px 10px;border-radius:9px;border:1px solid var(--line);background:var(--bg);outline:none}
+.field input[type=range]{padding:0;accent-color:var(--accent)}
+.check{display:flex;align-items:center;gap:8px;padding-top:20px}
+.check input{width:18px;height:18px;accent-color:var(--accent)}
+.actions{display:flex;gap:10px;align-items:center;margin-top:18px;flex-wrap:wrap}
+#jobs{margin-top:26px;display:flex;flex-direction:column;gap:16px}
+.job-head{display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.job-title{font-weight:700;font-size:16px;overflow-wrap:anywhere;flex:1 1 260px;min-width:0}
+.job-sub{color:var(--muted);font-size:13px;margin-top:2px;overflow-wrap:anywhere}
+.badge{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:6px;background:var(--panel2);color:var(--muted);margin-right:6px}
+.badge.live{background:var(--live);color:#fff;animation:pulse 1.6s infinite}
+.badge.done{color:var(--ok)} .badge.error{color:var(--live)}
+@keyframes pulse{50%{opacity:.55}}
+.bar{height:6px;background:var(--bg);border-radius:9px;overflow:hidden;margin-top:12px}
+.bar i{display:block;height:100%;background:var(--accent);transition:width .5s}
+.timeline{position:relative;height:26px;background:var(--bg);border-radius:8px;margin-top:12px;overflow:hidden}
+.timeline .clipspan{position:absolute;top:0;bottom:0;background:rgba(198,255,61,.22);border-left:2px solid var(--accent)}
+.timeline .hit{position:absolute;top:4px;bottom:4px;width:2px;background:#fff;opacity:.55}
+.timeline .hit.palabra{background:#59b8ff;opacity:1}
+.clips{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin-top:14px}
+.clip{background:var(--panel2);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.clip video{width:100%;aspect-ratio:9/16;background:#000;display:block;object-fit:contain}
+.clip.wide video{aspect-ratio:16/9}
+.clip-body{padding:10px;display:flex;flex-direction:column;gap:8px}
+.clip-header-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.viral-badge{background:linear-gradient(135deg,rgba(198,255,61,.18),rgba(255,107,0,.22));color:var(--accent);border:1px solid rgba(198,255,61,.35);font-size:11px;font-weight:800;padding:2px 8px;border-radius:99px;letter-spacing:0.3px}
+.clip-dur-badge{font-size:11px;font-weight:700;color:var(--muted);background:rgba(255,255,255,.06);padding:2px 7px;border-radius:6px}
+.clip-title{display:flex;gap:6px}
+.clip-title input{min-width:0;padding:7px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);outline:none}
+.clip-title .em{width:46px;text-align:center;flex:none}
+.clip-title .ti{flex:1}
+.clip-meta{font-size:12px;color:var(--muted)}
+.clip-actions{display:flex;gap:6px;flex-wrap:wrap}
+.clip-actions a{text-decoration:none}
+.clip-social{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;padding-top:8px;border-top:1px solid rgba(255,255,255,.07)}
+.btn-social{font-size:11px;font-weight:700;padding:5px 9px;border-radius:99px;border:1px solid var(--line);background:var(--bg);color:var(--text);display:inline-flex;align-items:center;gap:4px;cursor:pointer;text-decoration:none;transition:all .15s}
+.btn-social:hover{transform:translateY(-1px)}
+.btn-social.tiktok{border-color:rgba(254,44,85,.5);color:#fff}
+.btn-social.tiktok:hover{background:#fe2c55;color:#fff}
+.btn-social.shorts{border-color:rgba(255,0,0,.5);color:#ff4d4d}
+.btn-social.shorts:hover{background:#ff0000;color:#fff}
+.btn-social.reels{border-color:rgba(225,48,108,.5);color:#e1306c}
+.btn-social.reels:hover{background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff}
+.btn-social.share{border-color:rgba(198,255,61,.5);color:var(--accent)}
+.btn-social.share:hover{background:var(--accent);color:var(--accent-ink)}
+.btn-social.copy{border-color:#4a5070;color:var(--muted)}
+.btn-social.copy:hover{color:#fff;border-color:#fff}
+.manual{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.manual .field{flex:0 1 110px} .manual .field.wide{flex:1 1 200px}
+pre.log{background:var(--bg);border-radius:8px;padding:10px;font-size:12px;color:var(--muted);max-height:180px;overflow:auto;white-space:pre-wrap;margin:10px 0 0}
+.empty{color:var(--muted);text-align:center;padding:30px 10px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#fff;color:#111;padding:10px 16px;border-radius:10px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;z-index:9999}
+body.embedded header{display:none!important}
+body.embedded .wrap{padding:8px;max-width:100%}
+body.embedded .paywall-alert{margin-bottom:8px}
+
+/* Modales */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:999;padding:16px}
+.modal-overlay.open{display:flex}
+.modal{background:var(--panel);border:1px solid var(--line);border-radius:18px;max-width:760px;width:100%;max-height:90vh;overflow-y:auto;padding:26px;position:relative}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.modal-title{font-size:20px;font-weight:800}
+.modal-close{background:none;border:0;color:var(--muted);font-size:22px;cursor:pointer}
+.plan-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px;margin:20px 0}
+.plan-card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;position:relative}
+.plan-card.featured{border-color:var(--accent);box-shadow:0 0 20px rgba(198,255,61,.12)}
+.plan-badge{position:absolute;top:-10px;right:14px;background:var(--accent);color:var(--accent-ink);font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;text-transform:uppercase}
+.plan-price{font-size:20px;font-weight:800;margin:10px 0 14px}
+.plan-feats{font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:6px;flex:1;margin-bottom:16px}
+.bank-box{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px;margin-top:16px;font-size:13px}
+.bank-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.paywall-alert{background:rgba(255,77,94,.1);border:1px solid rgba(255,77,94,.3);color:#ff98a2;padding:12px 16px;border-radius:12px;margin-bottom:18px;display:none;align-items:center;justify-content:space-between;gap:12px}
+.paywall-alert.open{display:flex}
+</style>
+<style id="modern">
+/* Capa visual moderna: solo estilos, la lógica no cambia */
+:root{--bg:#0a0a10;--panel:#12131b;--panel2:#1a1c27;--line:#262a3a;--muted:#9aa0b6;--radius:20px}
+*{scrollbar-width:thin;scrollbar-color:#3a3f55 transparent}
+html,body{font-family:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.logo,.modal-title,.plan-price,.job-title,h2{font-family:'Space Grotesk','Inter',system-ui,sans-serif}
+.logo{font-size:26px;letter-spacing:-.03em}
+header{position:sticky;top:0;z-index:30;padding:14px 0;margin-bottom:22px;background:rgba(10,10,16,.85);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.card{border-radius:var(--radius);padding:28px;box-shadow:0 1px 0 rgba(255,255,255,.03) inset,0 24px 60px -34px rgba(0,0,0,.9)}
+h2{font-size:12px;letter-spacing:.14em;margin-top:30px}
+.urlrow input[type=url]{border-radius:16px;padding:18px 20px;background:var(--panel2);transition:border-color .2s,box-shadow .2s}
+.urlrow input[type=url]:focus,.tags:focus-within,.field input:focus,.field select:focus,#licenseKeyInput:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(198,255,61,.14)}
+#licenseKeyInput{flex:1 1 220px;min-width:0;padding:14px 16px;border-radius:14px;border:1px solid var(--line);background:var(--panel2);color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s}
+.btn{border-radius:999px;padding:10px 18px;transition:transform .15s,border-color .15s,background .15s,box-shadow .15s}
+.btn:hover{transform:translateY(-1px);border-color:#4a5070}
+.btn.primary{padding:16px 30px;box-shadow:0 12px 32px -14px rgba(198,255,61,.6)}
+.btn.primary:hover{background:#d4ff63;border-color:#d4ff63}
+.btn.small{padding:8px 14px}
+.btn.small.primary{padding:8px 16px}
+.btn.vip-btn{border-radius:999px}
+.seg{border-radius:999px;background:var(--panel2)}
+.seg button{border-radius:999px;padding:10px 18px;transition:background .15s,color .15s}
+.seg button:hover{color:var(--text)}
+.seg button.on{background:var(--accent);color:var(--accent-ink)}
+.chip{border-radius:999px;padding:10px 18px;background:var(--panel2);transition:border-color .15s,color .15s,background .15s}
+.chip:hover{border-color:#4a5070;color:var(--text)}
+.tags{border-radius:16px;background:var(--panel2);padding:10px}
+.tag{border-radius:999px;background:var(--bg)}
+.field input,.field select{border-radius:12px;background:var(--panel2);padding:11px 12px}
+.pill{padding:6px 14px}
+.clip{border-radius:20px;transition:transform .2s,border-color .2s}
+.clip:hover{transform:translateY(-3px);border-color:#3b4160}
+.bar{height:8px;border-radius:99px}
+.bar i{border-radius:99px}
+.timeline{border-radius:12px;background:var(--panel2)}
+.paywall-alert{border-radius:16px}
+.modal-overlay{background:rgba(5,5,10,.7);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.modal{border-radius:28px;padding:34px;box-shadow:0 40px 100px -30px rgba(0,0,0,.9)}
+.modal-title{font-size:24px;letter-spacing:-.02em}
+.modal-close{width:44px;height:44px;border-radius:50%;font-size:20px;transition:background .15s,color .15s}
+.modal-close:hover{background:var(--panel2);color:var(--text)}
+.plan-card{border-radius:24px;padding:26px;transition:transform .2s}
+.plan-card:hover{transform:translateY(-4px)}
+.plan-card.featured{box-shadow:0 0 0 1px var(--accent),0 24px 56px -28px rgba(198,255,61,.4)}
+.plan-price{font-size:28px;letter-spacing:-.02em}
+.plan-badge{border-radius:999px;padding:4px 12px}
+.bank-box{border-radius:18px}
+#toast{border-radius:999px;padding:12px 22px;box-shadow:0 16px 40px -12px rgba(0,0,0,.7)}
+:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.ic{width:1.15em;height:1.15em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;margin-right:8px}
+.btn,a.btn{display:inline-flex;align-items:center;justify-content:center}
+.seg button{display:inline-flex;align-items:center}
+.seg button[data-v=live] .ic{color:var(--live)}
+.modal-close{display:inline-flex;align-items:center;justify-content:center}
+.modal-close .ic{margin:0}
+.modal-title{display:flex;align-items:center}
+.modal-title .ic{color:var(--accent);width:1.1em;height:1.1em}
+.plan-feats span{display:flex;align-items:flex-start}
+.plan-feats .ic{color:var(--ok);margin-top:.15em;margin-right:8px}
+.paywall-alert .ic{color:var(--warn)}
+#userPill.vip::before,#userPill.trial::before,#userPill.ok::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
+/* Vista compacta dentro del Modo Multi-Pantalla */
+body.embedded .card{padding:14px;border-radius:14px}
+body.embedded h2{margin:14px 0 6px}
+body.embedded .urlrow input[type=url]{padding:12px 14px;font-size:14px}
+body.embedded .chip{padding:6px 12px;font-size:13px}
+body.embedded .seg button{padding:7px 12px}
+body.embedded .btn.primary{padding:12px 20px;font-size:15px}
+body.embedded .hint{font-size:12px}
+body.embedded #pills{display:none}
+@media(max-width:640px){.card{padding:18px}.logo{font-size:22px}.modal{padding:22px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="logo"><svg width="30" height="30" viewBox="0 0 30 30" fill="none" stroke="#c6ff3d" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" style="vertical-align:-6px;margin-right:10px"><circle cx="15" cy="15" r="12"/><circle cx="15" cy="15" r="6"/><path d="M15 15 24 8"/></svg>Clip<span>Radar</span></div>
+      <div class="job-sub">Clipper con IA & detección acústica. Pega un video o directo y descarga tus clips.</div>
+    </div>
+    <div class="user-bar">
+      <span class="pill" id="userPill">Cargando…</span>
+      <a class="btn small primary" href="/multi" style="text-decoration:none;font-weight:700"><i data-ic="grid"></i>Modo 6 Pantallas</a>
+      <button class="btn small" id="btnPlans" onclick="openPlansModal()"><i data-ic="star"></i>Planes &amp; Cobro</button>
+      <button class="btn small" id="btnAdmin" style="display:none" onclick="openAdminModal()"><i data-ic="key"></i>Generar Claves</button>
+      <button class="btn small" id="btnAuth" onclick="openAuthModal()"><i data-ic="user"></i>Cuenta</button>
+    </div>
+  </header>
+
+  <!-- Alerta de prueba agotada -->
+  <div class="paywall-alert" id="paywallBanner">
+    <span><i data-ic="alert"></i><b>Tu periodo de prueba ha finalizado.</b> Desbloquea la versión Pro para continuar clipeando ilimitado.</span>
+    <button class="btn small primary" onclick="openPlansModal()">Desbloquear Pro</button>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h2>1 · Enlace</h2>
+      <div class="pills" id="pills"></div>
+    </div>
+    <div class="urlrow">
+      <input id="url" type="url" placeholder="https://youtube.com/watch?v=…  ·  twitch.tv/…  ·  kick.com/…" autocomplete="off">
+      <div class="seg" id="mode">
+        <button data-v="auto" class="on" title="Detecta solo si es un directo">Auto</button>
+        <button data-v="vod">Video</button>
+        <button data-v="live"><i data-ic="live"></i>En vivo</button>
+      </div>
+    </div>
+    <div class="hint">¿Tienes el video en tu PC? <label style="color:var(--accent);cursor:pointer;font-weight:600">Súbelo aquí<input id="file" type="file" accept="video/*,audio/*" hidden></label> <span id="fileName"></span></div>
+
+    <h2>2 · ¿Qué sonidos disparan un clip?</h2>
+    <div class="chips" id="sounds"></div>
+
+    <h2>3 · Palabras, frases o nombres</h2>
+    <div class="tags" id="tags"><input id="tagInput" placeholder="Escribe y pulsa Enter: golazo, no puede ser, Juan…"></div>
+    <div class="hint">Cuando alguien lo diga, se guarda el momento. Ignora mayúsculas y acentos.</div>
+
+    <details class="adv" id="adv">
+      <summary>Ajustes del clip</summary>
+      <div class="grid">
+        <div class="field"><label>Sensibilidad <span id="sensV"></span></label><input id="sensitivity" type="range" min="0" max="1" step="0.05"></div>
+        <div class="field"><label>Segundos antes del momento</label><input id="pre" type="number" min="0" max="120" step="1"></div>
+        <div class="field"><label>Segundos después</label><input id="post" type="number" min="1" max="180" step="1"></div>
+        <div class="field"><label>Duración mínima (s) · Viral</label><input id="min_len" type="number" min="15" max="120" step="1" value="30"></div>
+        <div class="field"><label>Duración máxima (s)</label><input id="max_len" type="number" min="15" max="600" step="1" value="60"></div>
+        <div class="field"><label>Máx. de clips (video)</label><input id="max_clips" type="number" min="1" max="200" step="1"></div>
+        <div class="field"><label>Formato</label><select id="layout">
+          <option value="vertical_blur">Vertical 9:16 · fondo difuminado</option>
+          <option value="split_screen">Pantalla doble 9:16 · Arriba y abajo (Split)</option>
+          <option value="vertical_crop">Vertical 9:16 · recorte al centro</option>
+          <option value="original">Original (horizontal)</option></select></div>
+        <div class="field"><label>Idioma hablado</label><select id="language">
+          <option value="es">Español</option><option value="en">Inglés</option><option value="pt">Portugués</option><option value="">Autodetectar</option></select></div>
+        <div class="field"><label>Precisión de transcripción</label><select id="whisper_model">
+          <option value="tiny">Rápida (tiny)</option><option value="base">Básica (base)</option><option value="small">Equilibrada (small)</option>
+          <option value="medium">Alta (medium)</option><option value="large-v3-turbo">Máxima (large-v3-turbo)</option></select></div>
+        <div class="field"><label>Calidad de descarga</label><select id="quality">
+          <option value="480">480p</option><option value="720">720p</option><option value="1080">1080p</option></select></div>
+        <label class="check"><input id="show_title" type="checkbox"> Título + emoji en el video</label>
+        <label class="check"><input id="captions" type="checkbox"> Subtítulos quemados</label>
+        <label class="check"><input id="smart_titles" type="checkbox"> Titular con lo que se dijo</label>
+      </div>
+    </details>
+
+    <div class="actions">
+      <button class="btn primary" id="go"><i data-ic="scissors"></i>Empezar a clipear</button>
+      <span class="hint" id="formMsg" style="margin:0"></span>
+    </div>
+  </div>
+
+  <div id="jobs"></div>
+</div>
+
+<!-- Modal de Planes y Cobro -->
+<div class="modal-overlay" id="plansModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title"><i data-ic="star"></i>Desbloquear Versión Pro</div>
+      <button class="modal-close" onclick="closeModals()" aria-label="Cerrar"><i data-ic="x"></i></button>
+    </div>
+    <div class="job-sub">Elige un plan para crear clips ilimitados a máxima calidad y sin marcas de agua.</div>
+
+    <div class="plan-grid">
+      <div class="plan-card">
+        <b>Prueba Gratuita</b>
+        <div class="plan-price">Gratis</div>
+        <div class="plan-feats">
+          <span><i data-ic="check"></i>3 clips completos</span>
+          <span><i data-ic="check"></i>Detección acústica (risas, gritos)</span>
+          <span><i data-ic="check"></i>Subtítulos automáticos</span>
+        </div>
+        <button class="btn small" disabled>Plan Actual</button>
+      </div>
+
+      <div class="plan-card featured">
+        <span class="plan-badge">Popular</span>
+        <b>Pro Mensual</b>
+        <div class="plan-price">RD$ 990 <small style="font-size:12px;color:var(--muted)">/ mes ($17 USD)</small></div>
+        <div class="plan-feats">
+          <span><i data-ic="check"></i><b>Clips ILIMITADOS</b></span>
+          <span><i data-ic="check"></i>Calidad Full HD 1080p</span>
+          <span><i data-ic="check"></i>Directos en vivo sin cortes</span>
+          <span><i data-ic="check"></i>Soporte VIP por WhatsApp</span>
+        </div>
+        <a class="btn small primary" target="_blank" href="https://wa.me/18290000000?text=Hola,%20quiero%20el%20Plan%20Pro%20Mensual%20de%20ClipRadar">Pagar Mensual</a>
+      </div>
+
+      <div class="plan-card">
+        <span class="plan-badge" style="background:var(--vip)">Vitalicio</span>
+        <b>VIP de por Vida</b>
+        <div class="plan-price">RD$ 2,490 <small style="font-size:12px;color:var(--muted)">Único ($39 USD)</small></div>
+        <div class="plan-feats">
+          <span><i data-ic="check"></i><b>Acceso de por vida</b></span>
+          <span><i data-ic="check"></i>Sin mensualidades jamás</span>
+          <span><i data-ic="check"></i>Actualizaciones incluidas</span>
+          <span><i data-ic="check"></i>Prioridad en cola</span>
+        </div>
+        <a class="btn small vip-btn" target="_blank" href="https://wa.me/18290000000?text=Hola,%20quiero%20el%20Plan%20VIP%20Vitalicio%20de%20ClipRadar">Comprar de por Vida</a>
+      </div>
+    </div>
+
+    <!-- Canjear clave de licencia -->
+    <div class="card" style="margin-top:16px;background:var(--bg)">
+      <b>¿Ya tienes una Clave de Activación?</b>
+      <div class="urlrow" style="margin-top:10px">
+        <input id="licenseKeyInput" placeholder="Ej: CLIP-PRO-89AF-2B10" style="text-transform:uppercase">
+        <button class="btn primary" onclick="submitLicense()">Activar Licencia</button>
+      </div>
+      <div class="hint">Ingresa la clave que te enviamos al realizar tu pago por transferencia bancaria o WhatsApp.</div>
+    </div>
+
+    <!-- Datos bancarios para República Dominicana -->
+    <div class="bank-box">
+      <b>Cuentas para transferencia en República Dominicana:</b>
+      <div class="bank-row"><span>Banco Popular:</span> <b>812-XXXXXX-X (Corriente / Ahorros)</b></div>
+      <div class="bank-row"><span>Banreservas:</span> <b>960-XXXXXX-X (Ahorros)</b></div>
+      <div class="bank-row"><span>Banco BHD:</span> <b>045-XXXXXX-X (Ahorros)</b></div>
+      <div class="hint" style="margin-top:8px">Envía tu comprobante a nuestro WhatsApp para recibir tu clave de activación inmediata.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Cuenta / Auth -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head">
+      <div class="modal-title" id="authTitle">Iniciar Sesión</div>
+      <button class="modal-close" onclick="closeModals()" aria-label="Cerrar"><i data-ic="x"></i></button>
+    </div>
+    <div id="authBody">
+      <div class="field" style="margin-bottom:12px">
+        <label>Correo Electrónico</label>
+        <input id="authEmail" type="email" placeholder="tu@correo.com">
+      </div>
+      <div class="field" style="margin-bottom:12px">
+        <label>Contraseña</label>
+        <input id="authPass" type="password" placeholder="Tu contraseña">
+      </div>
+      <div class="field" id="nameField" style="display:none;margin-bottom:12px">
+        <label>Nombre o Alias</label>
+        <input id="authName" type="text" placeholder="Ej. Carlos">
+      </div>
+      <div style="display:flex;gap:10px;margin-top:16px">
+        <button class="btn primary" id="authSubmit" style="flex:1" onclick="submitAuth()">Entrar</button>
+      </div>
+      <div class="hint" style="text-align:center;margin-top:14px">
+        <a href="#" id="toggleAuthMode" onclick="toggleAuthMode(event)" style="color:var(--accent)">¿No tienes cuenta? Regístrate aquí</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Administrador (Generador de Licencias) -->
+<div class="modal-overlay" id="adminModal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-head">
+      <div class="modal-title"><i data-ic="crown"></i>Generador de licencias (Dueño)</div>
+      <button class="modal-close" onclick="closeModals()" aria-label="Cerrar"><i data-ic="x"></i></button>
+    </div>
+    <div class="hint" style="margin-bottom:14px">Genera claves de activación para tus clientes que paguen por transferencia bancaria o tarjeta.</div>
+    <div class="field" style="margin-bottom:12px">
+      <label>Plan a Asignar</label>
+      <select id="genPlan">
+        <option value="pro_monthly">Pro Mensual (Clips Ilimitados)</option>
+        <option value="pro_lifetime">VIP Vitalicio (De por vida)</option>
+      </select>
+    </div>
+    <button class="btn primary" style="width:100%" onclick="adminGenerateKey()">Generar Nueva Clave</button>
+    <div id="genResult" style="margin-top:16px;display:none;background:var(--bg);padding:14px;border-radius:10px;border:1px solid var(--line);text-align:center">
+      <div style="font-size:12px;color:var(--muted)">CLAVE GENERADA:</div>
+      <div id="genKeyText" style="font-size:18px;font-weight:800;color:var(--accent);margin:6px 0;letter-spacing:1px;user-select:all"></div>
+      <div style="font-size:12px;color:var(--muted)">Copia esta clave y envíasela a tu cliente.</div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const $ = (s, r = document) => r.querySelector(s);
+/* Íconos (SVG estáticos): reemplazan a los <i data-ic="nombre"> del HTML */
+const ICONS = {
+  grid: '<rect x="3" y="4" width="8" height="7" rx="1.5"/><rect x="13" y="4" width="8" height="7" rx="1.5"/><rect x="3" y="13" width="8" height="7" rx="1.5"/><rect x="13" y="13" width="8" height="7" rx="1.5"/>',
+  star: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+  key: '<circle cx="8" cy="15" r="4"/><path d="m11 12 9-9M16 7l3 3"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  alert: '<path d="M12 3 2 20h20zM12 10v4M12 17h.01"/>',
+  live: '<circle cx="12" cy="12" r="3"/><path d="M6.3 6.3a8 8 0 0 0 0 11.4M17.7 6.3a8 8 0 0 1 0 11.4"/>',
+  scissors: '<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/>',
+  x: '<path d="M6 6l12 12M18 6 6 18"/>',
+  check: '<path d="m5 12 5 5 9-10"/>',
+  crown: '<path d="m3 8 4 4 5-7 5 7 4-4-2 11H5z"/>'
+};
+const icon = (n) => { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('viewBox', '0 0 24 24'); s.setAttribute('class', 'ic'); s.setAttribute('aria-hidden', 'true'); s.innerHTML = ICONS[n] || ''; return s; };
+document.querySelectorAll('i[data-ic]').forEach(i => i.replaceWith(icon(i.dataset.ic)));
+const el = (tag, props = {}, ...kids) => {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) {
+    if (k === 'class') n.className = v; else if (k === 'text') n.textContent = v;
+    else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else if (v !== false && v != null) n.setAttribute(k, v);
+  }
+  for (const kid of kids.flat()) if (kid != null) n.append(kid);
+  return n;
+};
+const api = async (path, opts = {}) => {
+  if (opts.json) { opts.body = JSON.stringify(opts.json); opts.headers = {'Content-Type': 'application/json'}; }
+  const r = await fetch(path, opts);
+  if (r.status === 402) {
+    // Paywall interceptor
+    $('#paywallBanner').classList.add('open');
+    openPlansModal();
+  }
+  if (!r.ok) { let m = r.statusText; try { m = (await r.json()).detail || m; } catch {} throw new Error(m); }
+  return r.json();
+};
+const toast = (msg) => { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 3200); };
+const clock = (s) => { s = Math.max(0, Math.round(s)); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return (h ? h + ':' + String(m).padStart(2, '0') : m) + ':' + String(x).padStart(2, '0'); };
+const parseClock = (v) => { const p = String(v).trim().split(':').map(Number); if (p.some(isNaN)) return NaN; return p.reduce((a, b) => a * 60 + b, 0); };
+
+/* ---------- Modales y Auth ---------- */
+const urlParams = new URLSearchParams(window.location.search);
+const isEmbedded = urlParams.get('embed') === '1';
+const currentScreen = urlParams.get('screen');
+const storageKey = currentScreen ? ('clipradar_screen_' + currentScreen) : 'clipradar';
+
+if (isEmbedded) {
+  document.body.classList.add('embedded');
+}
+let currentUser = null;
+let isRegister = false;
+
+function openPlansModal() { $('#plansModal').classList.add('open'); }
+function openAuthModal() { $('#authModal').classList.add('open'); }
+function openAdminModal() { $('#adminModal').classList.add('open'); }
+function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open')); }
+
+function toggleAuthMode(e) {
+  if (e) e.preventDefault();
+  isRegister = !isRegister;
+  $('#authTitle').textContent = isRegister ? 'Crear Cuenta' : 'Iniciar Sesión';
+  $('#nameField').style.display = isRegister ? 'block' : 'none';
+  $('#authSubmit').textContent = isRegister ? 'Registrarse' : 'Entrar';
+  $('#toggleAuthMode').textContent = isRegister ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate aquí';
+}
+
+async function submitAuth() {
+  const email = $('#authEmail').value.trim(), password = $('#authPass').value.trim(), name = $('#authName').value.trim();
+  if (!email || !password) return toast('Completa el correo y la contraseña');
+  try {
+    const ep = isRegister ? '/api/auth/register' : '/api/auth/login';
+    const res = await api(ep, {method: 'POST', json: {email, password, name}});
+    currentUser = res.user;
+    updateUserUI(currentUser);
+    closeModals();
+    toast('¡Bienvenido, ' + (currentUser.name || currentUser.email) + '!');
+  } catch (err) {
+    toast(err.message);
+  }
+}
+
+async function submitLicense() {
+  const key = $('#licenseKeyInput').value.trim();
+  if (!key) return toast('Ingresa tu clave de activación');
+  try {
+    const res = await api('/api/billing/activate', {method: 'POST', json: {key}});
+    currentUser = res.user;
+    updateUserUI(currentUser);
+    $('#licenseKeyInput').value = '';
+    closeModals();
+    $('#paywallBanner').classList.remove('open');
+    toast(res.message);
+  } catch (err) {
+    toast(err.message);
+  }
+}
+
+async function adminGenerateKey() {
+  const plan = $('#genPlan').value;
+  try {
+    const res = await api('/api/admin/generate-license', {method: 'POST', json: {plan}});
+    $('#genResult').style.display = 'block';
+    $('#genKeyText').textContent = res.key;
+    toast('Clave generada');
+  } catch (err) {
+    toast(err.message);
+  }
+}
+
+function updateUserUI(u) {
+  const p = $('#userPill');
+  if (!u) { p.textContent = 'Invitado'; return; }
+  
+  const screens = u.max_screens || (u.role === 'admin' ? 6 : (u.plan === 'free_trial' ? 1 : 4));
+  if (u.role === 'admin' || u.plan === 'lifetime_vip') {
+    p.className = 'pill vip';
+    p.textContent = `Dueño / VIP (6 Pantallas)`;
+    $('#btnAdmin').style.display = 'inline-block';
+    $('#paywallBanner').classList.remove('open');
+  } else if (u.plan === 'free_trial') {
+    p.className = 'pill trial';
+    p.textContent = `Prueba:${u.trial_clips_left} clips (1 Pantalla)`;
+    if (u.trial_clips_left <= 0) $('#paywallBanner').classList.add('open');
+  } else {
+    p.className = 'pill ok';
+    p.textContent = `Pro Activo(4 Pantallas) · ${u.name || u.email}`;
+    $('#paywallBanner').classList.remove('open');
+  }
+}
+
+/* ---------- formulario ---------- */
+const NUM = ['pre', 'post', 'min_len', 'max_len', 'max_clips', 'sensitivity'], SEL = ['layout', 'language', 'whisper_model', 'quality'], CHK = ['show_title', 'captions', 'smart_titles'];
+let state = {mode: 'auto', sounds: [], hype: true, keywords: []};
+let KINDS = {palabra: {emoji: '🗣️', label: 'Palabra clave'}, manual: {emoji: '🎬', label: 'Manual'}};
+
+function saveForm() {
+  const s = {...state};
+  s.url = $('#url').value;
+  [...NUM, ...SEL].forEach(k => s[k] = $('#' + k).value);
+  CHK.forEach(k => s[k] = $('#' + k).checked);
+  try { localStorage.setItem(storageKey, JSON.stringify(s)); } catch {}
+}
+function settings() {
+  const s = {mode: state.mode, sounds: [...state.sounds], hype: state.hype, keywords: [...state.keywords]};
+  NUM.forEach(k => s[k] = Number($('#' + k).value));
+  SEL.forEach(k => s[k] = $('#' + k).value);
+  CHK.forEach(k => s[k] = $('#' + k).checked);
+  return s;
+}
+
+function renderTags() {
+  const box = $('#tags'), inp = $('#tagInput');
+  box.querySelectorAll('.tag').forEach(t => t.remove());
+  state.keywords.forEach((w, i) => {
+    const t = el('span', {class: 'tag'}, el('span', {text: w}), el('button', {type: 'button', text: '×', onclick: () => { state.keywords.splice(i, 1); renderTags(); saveForm(); }}));
+    box.insertBefore(t, inp);
+  });
+}
+function addTag(v) {
+  v = v.replace(/[,\n\r]/g, ' ').trim();
+  if (!v) return;
+  if (/^https?:\/\//i.test(v)) {
+    if (!$('#url').value.trim()) {
+      $('#url').value = v;
+      saveForm();
+      toast('Enlace detectado y colocado en la casilla de video');
+    }
+    return;
+  }
+  if (!state.keywords.includes(v)) state.keywords.push(v);
+  renderTags(); saveForm();
+}
+$('#url').addEventListener('input', () => saveForm());
+$('#tagInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(e.target.value); e.target.value = ''; }
+  else if (e.key === 'Backspace' && !e.target.value && state.keywords.length) { state.keywords.pop(); renderTags(); saveForm(); }
+});
+$('#tagInput').addEventListener('blur', e => { if (e.target.value.trim()) { addTag(e.target.value); e.target.value = ''; } });
+$('#tags').addEventListener('click', () => $('#tagInput').focus());
+$('#mode').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; state.mode = b.dataset.v; syncMode(); saveForm(); });
+const syncMode = () => $('#mode').querySelectorAll('button').forEach(x => x.classList.toggle('on', x.dataset.v === state.mode));
+$('#sensitivity').addEventListener('input', e => $('#sensV').textContent = '· ' + Math.round(e.target.value * 100) + '%');
+document.addEventListener('change', e => { if (e.target.closest('#adv')) saveForm(); });
+$('#file').addEventListener('change', e => { const f = e.target.files[0]; $('#fileName').textContent = f ? '· ' + f.name : ''; });
+
+function renderSounds(list, hype) {
+  const box = $('#sounds'); box.textContent = '';
+  const chip = (id, emoji, label, on, toggle) => box.append(el('div', {class: 'chip' + (on ? ' on' : ''), role: 'button', onclick: () => { toggle(); renderSounds(list, hype); saveForm(); }}, emoji + ' ' + label));
+  list.forEach(s => chip(s.id, s.emoji, s.label, state.sounds.includes(s.id), () => { state.sounds = state.sounds.includes(s.id) ? state.sounds.filter(x => x !== s.id) : [...state.sounds, s.id]; }));
+  chip('hype', hype.emoji, hype.label, state.hype, () => { state.hype = !state.hype; });
+}
+
+async function init() {
+  const st = await api('/api/status');
+  const d = st.defaults;
+  currentUser = st.user;
+  updateUserUI(currentUser);
+  if (!st.user) openAuthModal();
+
+  let saved = {}; try { saved = JSON.parse(localStorage.getItem(storageKey) || '{}'); } catch {}
+  if (saved.url) $('#url').value = saved.url;
+  state = {mode: saved.mode || 'auto', sounds: saved.sounds || d.sounds, hype: saved.hype ?? d.hype, keywords: saved.keywords || []};
+  [...NUM, ...SEL].forEach(k => $('#' + k).value = saved[k] ?? d[k]);
+  CHK.forEach(k => $('#' + k).checked = saved[k] ?? d[k]);
+  $('#sensitivity').dispatchEvent(new Event('input'));
+  st.sounds.forEach(s => KINDS[s.id] = s); KINDS.hype = st.hype;
+  syncMode(); renderSounds(st.sounds, st.hype); renderTags(); pills(st);
+  poll();
+}
+
+function pills(st) {
+  const p = $('#pills'); p.textContent = '';
+  const add = (ok, text, title) => p.append(el('span', {class: 'pill ' + (ok ? 'ok' : 'bad'), title: title || ''}, (ok ? '● ' : '▲ ') + text));
+  add(st.ffmpeg, 'ffmpeg', st.ffmpeg_error);
+  add(st.yamnet.available, 'Sonidos' + (st.yamnet.loaded ? '' : st.yamnet.available ? ' (listo)' : ' no disponible'), st.yamnet.reason);
+  add(st.whisper.available, 'Voz' + (st.whisper.loaded.length ? '' : st.whisper.available ? ' (listo)' : ' no disponible'), st.whisper.reason);
+}
+
+$('#go').addEventListener('click', async () => {
+  const url = $('#url').value.trim(), file = $('#file').files[0], s = settings(), btn = $('#go');
+  if (currentScreen) s.screen = String(currentScreen);
+  if (!url && !file) return toast('Pega un enlace o sube un video');
+  if (!s.sounds.length && !s.hype && !s.keywords.length) return toast('Elige al menos un sonido o una palabra');
+  btn.disabled = true;
+  try {
+    if (file && !url) {
+      $('#formMsg').textContent = 'Subiendo ' + file.name + '…';
+      const fd = new FormData(); fd.append('file', file); fd.append('settings', JSON.stringify(s));
+      await api('/api/upload', {method: 'POST', body: fd});
+      $('#file').value = ''; $('#fileName').textContent = '';
+    } else {
+      await api('/api/jobs', {method: 'POST', json: {url, mode: state.mode, settings: s}});
+    }
+    $('#formMsg').textContent = '';
+    refresh();
+  } catch (e) { $('#formMsg').textContent = ''; toast(e.message); }
+  btn.disabled = false;
+});
+
+/* ---------- trabajos ---------- */
+const cards = new Map(), openLogs = new Set();
+const ACTIVE = new Set(['queued', 'resolving', 'downloading', 'analyzing', 'rendering', 'live']);
+
+function jobCard(j) {
+  const c = {
+    root: el('div', {class: 'card', id: 'job-' + j.id}),
+    head: el('div', {class: 'job-head'}),
+    bar: el('div', {class: 'bar'}, el('i')),
+    timeline: el('div', {class: 'timeline'}),
+    clips: el('div'), extra: el('div'),
+  };
+  c.root.append(c.head, c.bar, c.timeline, c.extra, c.clips);
+  return c;
+}
+
+function drawHead(c, j) {
+  c.head.textContent = '';
+  const badge = el('span', {class: 'badge ' + j.status, text: j.status === 'live' ? 'En vivo' : j.status});
+  const t = el('div', {class: 'job-title'}, badge, el('span', {text: j.title || j.url}));
+  const sub = el('div', {class: 'job-sub'}, `${j.mode.toUpperCase()} · ${j.message || ''}`);
+  const actions = el('div', {style: 'display:flex;gap:6px;margin-left:auto'});
+  if (ACTIVE.has(j.status)) {
+    actions.append(el('button', {class: 'btn small danger', text: j.status === 'live' ? 'Detener directo' : 'Cancelar', onclick: async (e) => { e.target.disabled = true; e.target.textContent = 'Deteniendo…'; toast('Deteniendo transmisión…'); await api(`/api/jobs/${j.id}/stop`, {method: 'POST'}); refresh(); }}));
+  } else {
+    if (j.clips && j.clips.length) actions.append(el('a', {class: 'btn small primary', href: `/api/jobs/${j.id}/zip`, text: `Descargar ZIP (${j.clips.length})`}));
+    actions.append(el('button', {class: 'btn small danger', text: 'Borrar', onclick: async () => { if (confirm('¿Borrar este trabajo y todos sus clips?')) { await api(`/api/jobs/${j.id}`, {method: 'DELETE'}); refresh(); } }}));
+  }
+  const info = el('div', {style: 'flex:1 1 260px'}, t, sub);
+  c.head.append(info, actions);
+  c.bar.querySelector('i').style.width = Math.round((j.progress || 0) * 100) + '%';
+  c.bar.style.display = j.status === 'done' || j.status === 'stopped' ? 'none' : 'block';
+}
+
+function drawTimeline(c, j, full) {
+  c.timeline.textContent = '';
+  c.extra.textContent = '';
+  const dur = (full && full.duration) || j.duration || 1;
+  if (full && full.hits) {
+    full.hits.forEach(h => {
+      const left = (h.t / dur) * 100;
+      if (left >= 0 && left <= 100) c.timeline.append(el('div', {class: 'hit ' + (h.kind || ''), style: `left:${left}%`, title: `${clock(h.t)} · ${(KINDS[h.kind] || {}).label || h.kind} (${Math.round(h.score * 100)}%)`}));
+    });
+  }
+  (j.clips || []).forEach(k => {
+    const l = (k.start / dur) * 100, w = ((k.end - k.start) / dur) * 100;
+    c.timeline.append(el('div', {class: 'clipspan', style: `left:${l}%;width:${Math.max(0.6, w)}%`, title: `${k.emoji || ''} ${k.title || ''}`}));
+  });
+  const tRow = el('div', {style: 'display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px'}, el('span', {text: '0:00'}), el('span', {text: clock(dur)}));
+  c.extra.append(tRow);
+
+  if (j.status === 'done' || j.status === 'stopped') {
+    const a = el('input', {placeholder: '1:23'}), b = el('input', {placeholder: '1:50'}), t = el('input', {placeholder: 'Título opcional'}), btn = el('button', {class: 'btn small', text: 'Crear clip manual', onclick: async () => {
+      const s = parseClock(a.value), e = parseClock(b.value);
+      if (isNaN(s) || isNaN(e) || e <= s) return toast('Escribe inicio y fin, por ejemplo 1:23 y 1:50');
+      btn.disabled = true; btn.textContent = 'Creando…';
+      try { await api(`/api/jobs/${j.id}/clips`, {method: 'POST', json: {start: s, end: e, title: t.value}}); a.value = b.value = t.value = ''; } catch (err) { toast(err.message); }
+      btn.disabled = false; btn.textContent = 'Crear clip manual'; refresh();
+    }});
+    c.extra.append(el('div', {class: 'manual'}, el('div', {class: 'field'}, el('label', {text: 'Desde'}), a), el('div', {class: 'field'}, el('label', {text: 'Hasta'}), b), el('div', {class: 'field wide'}, el('label', {text: 'Título'}), t), btn));
+  }
+}
+
+/* ---------- funciones de redes sociales ---------- */
+function getClipShareText(j, k) {
+  const title = (k.emoji ? k.emoji + ' ' : '🔥 ') + (k.title || '¡Momento viral!');
+  const tags = '#shorts #tiktok #viral #parati #fyp #clips #streamer #podcast #clipradar';
+  return `${title}\n\n${tags}`;
+}
+
+function triggerDownload(url, filename) {
+  const a = document.createElement('a');
+  a.href = url;
+  if (filename) a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+async function shareToTikTok(j, k) {
+  const text = getClipShareText(j, k);
+  try { await navigator.clipboard.writeText(text); } catch {}
+  triggerDownload(`/media/${j.id}/${k.file}?download=1`, k.file);
+  toast('¡Video descargado y título copiado! Pégalo en TikTok.');
+  setTimeout(() => window.open('https://www.tiktok.com/upload', '_blank'), 400);
+}
+
+async function shareToShorts(j, k) {
+  const text = `${(k.emoji ? k.emoji + ' ' : '🔥 ') + (k.title || '¡Momento épico!')} #Shorts #Viral #ClipRadar`;
+  try { await navigator.clipboard.writeText(text); } catch {}
+  triggerDownload(`/media/${j.id}/${k.file}?download=1`, k.file);
+  toast('¡Video descargado y título copiado! Pégalo en YouTube Shorts.');
+  setTimeout(() => window.open('https://studio.youtube.com/channel/UC/videos/upload?d=pt', '_blank'), 400);
+}
+
+async function shareToReels(j, k) {
+  const text = getClipShareText(j, k);
+  try { await navigator.clipboard.writeText(text); } catch {}
+  triggerDownload(`/media/${j.id}/${k.file}?download=1`, k.file);
+  toast('¡Video descargado y hashtags copiados para Instagram Reels!');
+  setTimeout(() => window.open('https://www.instagram.com/', '_blank'), 400);
+}
+
+async function nativeShareClip(j, k) {
+  const fileUrl = `${window.location.origin}/media/${j.id}/${k.file}?download=1`;
+  const text = getClipShareText(j, k);
+  if (navigator.share) {
+    try {
+      const res = await fetch(fileUrl);
+      const blob = await res.blob();
+      const file = new File([blob], k.file, { type: 'video/mp4' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ title: k.title, text: text, files: [file] });
+        return;
+      }
+    } catch (e) {}
+    try {
+      await navigator.share({ title: k.title, text: text, url: fileUrl });
+      return;
+    } catch (e) {}
+  }
+  try {
+    await navigator.clipboard.writeText(text + '\n' + fileUrl);
+    toast('¡Enlace y hashtags copiados al portapapeles!');
+  } catch {
+    toast('Enlace: ' + fileUrl);
+  }
+}
+
+async function copyClipHashtags(j, k) {
+  const text = getClipShareText(j, k);
+  try {
+    await navigator.clipboard.writeText(text);
+    toast('¡Título y hashtags virales copiados!');
+  } catch {
+    toast('No se pudo copiar');
+  }
+}
+
+function drawClips(c, j) {
+  c.clips.textContent = '';
+  if (!j.clips.length) return;
+  const wide = j.settings.layout === 'original';
+  c.clips.append(el('div', {class: 'clips'}, j.clips.map(k => {
+    const v = k.v ? '?v=' + k.v : '';
+    const vScore = k.viral_score || Math.min(99, Math.max(72, Math.round(72 + (k.score || 1) * 3)));
+    const durSec = Math.max(1, Math.round(k.end - k.start));
+    const em = el('input', {class: 'em', value: k.emoji, 'aria-label': 'Emoji', maxlength: 8}), ti = el('input', {class: 'ti', value: k.title, 'aria-label': 'Título', maxlength: 120});
+    const save = el('button', {class: 'btn small', text: 'Aplicar', onclick: async () => {
+      save.disabled = true; save.textContent = '…';
+      try { await api(`/api/jobs/${j.id}/clips/${k.id}`, {method: 'PATCH', json: {title: ti.value, emoji: em.value}}); toast('Título actualizado'); } catch (e) { toast(e.message); }
+      refresh();
+    }});
+    return el('div', {class: 'clip' + (wide ? ' wide' : '')},
+      el('video', {src: `/media/${j.id}/${k.file}${v}`, poster: `/media/${j.id}/${k.thumb}${v}`, controls: '', preload: 'none', playsinline: ''}),
+      el('div', {class: 'clip-body'},
+        el('div', {class: 'clip-header-row'},
+          el('span', {class: 'viral-badge', text: `⚡ ${vScore}% Viral Score`}),
+          el('span', {class: 'clip-dur-badge', text: `${durSec}s`})
+        ),
+        el('div', {class: 'clip-title'}, em, ti),
+        el('div', {class: 'clip-meta', text: `${clock(k.start)} – ${clock(k.end)} · ${k.kinds.map(x => (KINDS[x] || {}).emoji || '').join(' ')} ${k.kinds.map(x => (KINDS[x] || {}).label || x).join(', ')}`, title: k.text || ''}),
+        el('div', {class: 'clip-actions'},
+          el('a', {class: 'btn small primary', href: `/media/${j.id}/${k.file}?download=1`, text: '⬇ Descargar MP4'}), save,
+          el('button', {class: 'btn small danger', text: '🗑', title: 'Borrar clip', onclick: async () => { await api(`/api/jobs/${j.id}/clips/${k.id}`, {method: 'DELETE'}); refresh(); }})),
+        el('div', {class: 'clip-social'},
+          el('button', {class: 'btn-social tiktok', onclick: () => shareToTikTok(j, k), title: 'Subir a TikTok (descarga video y copia título)'}, '🎵 TikTok'),
+          el('button', {class: 'btn-social shorts', onclick: () => shareToShorts(j, k), title: 'Subir a YouTube Shorts (descarga video y copia título)'}, '🔴 Shorts'),
+          el('button', {class: 'btn-social reels', onclick: () => shareToReels(j, k), title: 'Subir a Instagram Reels'}, '📸 Reels'),
+          el('button', {class: 'btn-social share', onclick: () => nativeShareClip(j, k), title: 'Compartir directamente (WhatsApp / Apps móviles)'}, '📲 Compartir'),
+          el('button', {class: 'btn-social copy', onclick: () => copyClipHashtags(j, k), title: 'Copiar título y hashtags virales'}, '📋 Hashtags'))));
+  })));
+}
+
+async function refresh() {
+  let jobs;
+  try { jobs = await api('/api/jobs'); } catch { return; }
+  if (currentScreen) {
+    jobs = jobs.filter(j => j.settings && String(j.settings.screen) === String(currentScreen));
+  }
+  const box = $('#jobs');
+  if (!jobs.length) {
+    cards.clear();
+    box.textContent = '';
+    box.append(el('div', {class: 'empty', text: currentScreen ? `Pantalla ${currentScreen}: sin directos activos. Pega un enlace arriba.` : 'Aún no hay trabajos. Pega un enlace arriba para empezar.'}));
+    return;
+  }
+  box.querySelector('.empty')?.remove();
+  for (const [id, c] of cards) if (!jobs.some(j => j.id === id)) { c.root.remove(); cards.delete(id); }
+  let prev = null;
+  for (const j of jobs) {
+    let c = cards.get(j.id);
+    if (!c) { c = jobCard(j); cards.set(j.id, c); prev ? prev.after(c.root) : box.prepend(c.root); }
+    prev = c.root;
+    const sigHead = [j.status, j.message, j.progress, j.title, j.clips.length].join('|');
+    if (sigHead !== c.sigHead) { c.sigHead = sigHead; drawHead(c, j); }
+    const sigClips = JSON.stringify(j.clips.map(k => [k.id, k.title, k.emoji, k.v])) + j.settings.layout;
+    const editing = c.clips.contains(document.activeElement) || [...c.clips.querySelectorAll('video')].some(v => !v.paused);
+    if (sigClips !== c.sigClips && !editing) { c.sigClips = sigClips; drawClips(c, j); }
+    const sigHits = [j.status, j.clips.length, Math.round(j.progress * 20), openLogs.has(j.id)].join('|');
+    if (sigHits !== c.sigHits && !c.extra.contains(document.activeElement)) {
+      c.sigHits = sigHits;
+      let full = null; try { full = await api('/api/jobs/' + j.id); } catch {}
+      drawTimeline(c, j, full);
+    }
+  }
+}
+
+async function poll() { await refresh(); setTimeout(poll, 1500); }
+init().catch(e => toast('No se pudo conectar con el servidor: ' + e.message));
+setInterval(async () => { try { const st = await api('/api/status'); pills(st); updateUserUI(st.user); } catch {} }, 15000);
+</script>
+</body>
+</html>

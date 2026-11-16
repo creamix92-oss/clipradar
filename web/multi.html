@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ClipRadar — Estudio Multi-Pantallas (2, 4, 6 Pantallas)</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'><rect width='30' height='30' rx='8' fill='%230a0a10'/><circle cx='15' cy='15' r='9' fill='none' stroke='%23c6ff3d' stroke-width='3'/><path d='M15 15 23 8' stroke='%23c6ff3d' stroke-width='3' stroke-linecap='round'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0c0d12; --panel:#15171f; --panel2:#1c1f2a; --line:#2a2e3d; --text:#eef0f6; --muted:#8d93a8;
+  --accent:#c6ff3d; --accent-ink:#0c0d12; --vip:#e5a93b; --radius:12px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;height:100%;background:var(--bg);color:var(--text);font:14px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+header{
+  height:56px;background:var(--panel);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;padding:0 16px;gap:14px;flex-wrap:nowrap;
+}
+.logo{font-size:18px;font-weight:800;letter-spacing:-.02em;white-space:nowrap}
+.logo span{color:var(--accent)}
+.seg{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px}
+.seg button{border:0;background:none;padding:6px 14px;border-radius:8px;cursor:pointer;color:var(--muted);font-weight:700;font-size:12px}
+.seg button.on{background:var(--accent);color:var(--accent-ink)}
+.btn{border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:6px 12px;cursor:pointer;font-weight:600;font-size:12px;color:inherit;text-decoration:none;white-space:nowrap}
+.btn:hover{border-color:var(--accent)}
+.pill{font-size:12px;padding:4px 10px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.pill.vip{color:var(--vip);border-color:rgba(229,169,59,.4);background:rgba(229,169,59,.1);font-weight:700}
+.lan-link{color:var(--muted);font-size:12px;display:flex;align-items:center;gap:6px;margin-left:auto}
+.lan-link b{color:var(--accent);user-select:all}
+
+/* Grid de Pantallas */
+#grid{
+  display:grid;width:100%;height:calc(100vh - 56px);
+  gap:8px;padding:8px;background:#06070a;
+}
+#grid.screens-2{grid-template-columns:1fr 1fr;grid-template-rows:1fr}
+#grid.screens-4{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+#grid.screens-6{grid-template-columns:1fr 1fr 1fr;grid-template-rows:1fr 1fr}
+
+.screen-cell{
+  background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+  overflow:hidden;position:relative;display:flex;flex-direction:column;
+}
+.screen-head{
+  height:28px;background:var(--panel2);border-bottom:1px solid var(--line);
+  padding:0 10px;display:flex;align-items:center;justify-content:space-between;
+  font-size:11px;font-weight:700;color:var(--muted);
+}
+.screen-head span.badge{color:var(--accent);background:rgba(198,255,61,.1);padding:2px 6px;border-radius:4px}
+iframe{width:100%;height:100%;border:0;flex:1;background:var(--bg)}
+</style>
+<style id="modern">
+/* Capa visual moderna: solo estilos, la lógica no cambia */
+:root{--bg:#0a0a10;--panel:#12131b;--panel2:#1a1c27;--line:#262a3a;--muted:#9aa0b6}
+html,body{font-family:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+header{height:64px;background:rgba(18,19,27,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.logo{font-family:'Space Grotesk','Inter',system-ui,sans-serif;font-size:22px}
+.seg{border-radius:999px;background:var(--panel2)}
+.seg button{border-radius:999px;padding:8px 16px;transition:background .15s,color .15s}
+.btn{border-radius:999px;padding:9px 16px;transition:transform .15s,border-color .15s}
+.btn:hover{transform:translateY(-1px)}
+.pill{padding:6px 14px}
+#grid{height:calc(100vh - 64px);gap:10px;padding:10px}
+.screen-cell{border-radius:20px}
+.screen-head{height:34px;font-size:12px}
+.screen-head span.badge{border-radius:999px;padding:3px 10px}
+:focus-visible{outline:3px solid #fff;outline-offset:2px}
+header{gap:12px}
+.seg button{white-space:nowrap}
+.seg button:disabled{opacity:.4;cursor:not-allowed}
+.lan-link{min-width:0;flex:0 1 auto}
+.lan-link b{overflow-wrap:anywhere}
+#grid.screens-1{grid-template-columns:1fr;grid-template-rows:1fr}
+@media(max-width:1200px){.lan-link span{display:none}}
+@media(max-width:900px){
+  html,body{height:auto;overflow:auto}
+  header{height:auto;flex-wrap:wrap;padding:10px 16px}
+  .lan-link{display:none}
+  #grid,#grid.screens-1,#grid.screens-2,#grid.screens-4,#grid.screens-6{height:auto;grid-template-columns:1fr;grid-template-rows:none}
+  .screen-cell{height:85vh}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><svg width="26" height="26" viewBox="0 0 30 30" fill="none" stroke="#c6ff3d" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" style="vertical-align:-6px;margin-right:8px"><circle cx="15" cy="15" r="12"/><circle cx="15" cy="15" r="6"/><path d="M15 15 24 8"/></svg>Clip<span>Radar</span> Multi-Studio</div>
+  
+  <div class="seg" id="modeSeg">
+    <button data-n="2" onclick="setScreens(2)">2 Pantallas</button>
+    <button data-n="4" onclick="setScreens(4)">4 Pantallas</button>
+    <button data-n="6" class="on" onclick="setScreens(6)">6 Pantallas</button>
+  </div>
+
+  <span class="pill" id="planPill">Cargando…</span>
+
+  <div class="lan-link">
+    <span>Conectar otros dispositivos:</span>
+    <b id="lanUrl">Cargando…</b>
+  </div>
+
+  <a class="btn" href="/"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:1.1em;height:1.1em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-.2em;margin-right:6px"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Vista clásica (1 pantalla)</a>
+</header>
+
+<div id="grid" class="screens-6"></div>
+
+<script>
+const $ = (s, r = document) => r.querySelector(s);
+let currentCount = 6;
+
+function setScreens(n) {
+  currentCount = n;
+  document.querySelectorAll('#modeSeg button').forEach(b => b.classList.toggle('on', Number(b.dataset.n) === n));
+  const grid = $('#grid');
+  grid.className = 'screens-' + n;
+  grid.textContent = '';
+  
+  for (let i = 1; i <= n; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'screen-cell';
+    cell.innerHTML = `
+      <div class="screen-head">
+        <span>Pantalla ${i}</span>
+        <span class="badge">ACTIVA</span>
+      </div>
+      <iframe src="/?embed=1&screen=${i}" loading="lazy"></iframe>
+    `;
+    grid.appendChild(cell);
+  }
+}
+
+// Configurar IP local para conectar desde otros dispositivos
+const loc = window.location;
+const port = loc.port ? ':' + loc.port : '';
+const isLocal = loc.hostname === 'localhost' || loc.hostname === '127.0.0.1';
+$('#lanUrl').textContent = isLocal ? `http://192.168.0.104${port}` : loc.origin;
+
+// Inicializar con 6 pantallas y ajustar a lo que permite el plan del usuario
+setScreens(6);
+fetch('/api/status').then(r => r.ok ? r.json() : null).then(st => {
+  const u = st && st.user;
+  if (!u) { $('#planPill').textContent = 'Inicia sesión en la vista clásica'; return; }
+  const max = u.max_screens || 1;
+  document.querySelectorAll('#modeSeg button').forEach(b => { if (Number(b.dataset.n) > max) { b.disabled = true; b.title = 'Tu plan permite hasta ' + max + ' pantallas'; } });
+  const pill = $('#planPill');
+  pill.textContent = u.role === 'admin' ? `Modo Administrador (${max} pantallas)` : `Tu plan: hasta ${max} pantalla${max === 1 ? '' : 's'}`;
+  pill.classList.toggle('vip', u.role === 'admin');
+  if (currentCount > max) setScreens(max >= 4 ? 4 : max >= 2 ? 2 : 1);
+}).catch(() => { $('#planPill').textContent = 'Sin conexión con el servidor'; });
+</script>
+</body>
+</html>

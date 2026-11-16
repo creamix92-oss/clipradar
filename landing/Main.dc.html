@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>ClipRadar — Clips con IA</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0B0B10;font-family:'Inter',system-ui,sans-serif;color:#F4F4F6}
+a{color:inherit;text-decoration:none}
+.nav a:hover{color:#fff}
+.nav a{padding:12px 4px}
+[id]{scroll-margin-top:90px}
+.skip{position:absolute;left:-9999px;top:8px;background:#fff;color:#0B0B10;padding:12px 20px;border-radius:8px;font-weight:600;z-index:100}
+.skip:focus{left:16px}
+a:focus-visible,button:focus-visible{outline:3px solid #fff;outline-offset:3px;border-radius:8px}
+h1{font-size:clamp(44px,9vw,84px)!important}
+h2{font-size:clamp(32px,5.5vw,52px)!important}
+#contacto h2{font-size:clamp(36px,6.5vw,64px)!important}
+.card{transition:transform .25s ease}
+.card:hover{transform:translateY(-6px)}
+.btn{transition:transform .2s ease}
+.btn:hover{transform:scale(1.04)}
+@keyframes ping{0%{transform:scale(.6);opacity:.9}100%{transform:scale(2.4);opacity:0}}
+.ping{animation:ping 2s ease-out infinite}
+@media (prefers-reduced-motion:reduce){.ping{animation:none}}
+</style>
+</helmet>
+<div style="background:#0B0B10;color:#F4F4F6;font-family:'Inter',system-ui,sans-serif;overflow-x:clip">
+
+<a class="skip" href="#top">Saltar al contenido</a>
+
+<!-- ANUNCIO: BARRA -->
+<sc-if value="{{showBar}}" hint-placeholder-val="{{ true }}">
+<div style="background:{{accent}};color:#0B0B10;padding:10px 56px 10px 16px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:center;font-size:15px;font-weight:500;position:relative">
+<span>Prueba ClipRadar con <strong>3 clips gratis</strong>.</span>
+<a href="#contacto" style="font-weight:700;text-decoration:underline;display:inline-block;padding:12px 4px">Empezar ahora</a>
+<button onClick="{{ closeBar }}" aria-label="Cerrar anuncio" style="position:absolute;right:8px;top:50%;margin-top:-22px;width:44px;height:44px;border:0;background:transparent;color:#0B0B10;cursor:pointer;display:flex;align-items:center;justify-content:center">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0B0B10" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+</button>
+</div>
+</sc-if>
+
+<!-- NAV -->
+<div role="banner" style="position:sticky;top:0;z-index:40;background:rgba(11,11,16,.88);backdrop-filter:blur(12px);border-bottom:1px solid #1F1F2A">
+<div style="max-width:1200px;margin:0 auto;padding:12px 24px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;box-sizing:border-box">
+<a href="#top" style="display:flex;align-items:center;gap:10px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:26px">
+<svg width="30" height="30" viewBox="0 0 30 30" fill="none" stroke="{{accent}}" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><circle cx="15" cy="15" r="12"/><circle cx="15" cy="15" r="6"/><path d="M15 15 24 8"/></svg>
+<span>Clip<span style="color:{{accent}}">Radar</span></span>
+</a>
+<div class="nav" role="navigation" aria-label="Principal" style="display:flex;flex-wrap:wrap;gap:28px;align-items:center;font-size:15px;color:#B8B8C4">
+<a href="#funciones">Funciones</a>
+<a href="#como">Cómo funciona</a>
+<a href="#planes">Planes</a>
+<a class="btn" href="#contacto" style="background:#F4F4F6;color:#0B0B10;padding:12px 22px;border-radius:999px;font-weight:600">Probar gratis</a>
+</div>
+</div>
+</div>
+
+<main>
+<!-- HERO -->
+<div id="top" style="max-width:1200px;margin:0 auto;padding:56px 24px 40px;display:flex;flex-wrap:wrap;gap:48px;align-items:center;box-sizing:border-box">
+<div style="flex:1 1 480px;min-width:0">
+<div style="display:inline-flex;align-items:center;gap:10px;padding:8px 16px;border:1px solid #8A8A9C;border-radius:999px;font-size:14px;color:#B8B8C4;margin-bottom:28px">
+<span style="width:8px;height:8px;border-radius:50%;background:{{accent}}"></span>Clipper con IA y detección acústica
+</div>
+<h1 style="margin:0;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:84px;line-height:0.98;letter-spacing:-0.03em">Detecta el momento. <span style="color:{{accent}}">Crea el clip.</span></h1>
+<p style="margin:28px 0 0;font-size:20px;line-height:1.55;color:#B8B8C4;max-width:540px">Pega un video o un directo. ClipRadar escucha las risas, los gritos y las palabras que tú eliges, y te entrega los clips listos para descargar.</p>
+<div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:36px">
+<a class="btn" href="http://localhost:8787" style="background:{{accent}};color:#0B0B10;padding:18px 32px;border-radius:999px;font-weight:600;font-size:17px">Empezar a clipear</a>
+<a class="btn" href="#planes" style="border:1px solid #8A8A9C;padding:18px 32px;border-radius:999px;font-weight:500;font-size:17px">Ver planes</a>
+</div>
+<p style="margin:24px 0 0;font-size:15px;color:#B8B8C4">3 clips gratis · YouTube, Twitch y Kick · Full HD en el plan Pro</p>
+</div>
+
+<!-- DETECTION CARD -->
+<div style="flex:1 1 440px;min-width:0;position:relative">
+<div style="background:#14141C;border:1px solid #2A2A38;border-radius:32px;padding:28px;box-sizing:border-box">
+<div style="display:flex;align-items:center;gap:10px;font-size:13px;letter-spacing:.08em;color:#B8B8C4;font-weight:600">
+<span style="position:relative;width:10px;height:10px"><span class="ping" style="position:absolute;inset:0;border-radius:50%;background:#FF4D6A"></span><span style="position:absolute;inset:0;border-radius:50%;background:#FF4D6A"></span></span>
+EN VIVO · ESCUCHANDO
+</div>
+<svg viewBox="0 0 400 120" width="100%" style="margin-top:20px;display:block" role="img" aria-label="Onda de audio con tres momentos detectados">
+<g fill="#3A3A4C">
+<rect x="4" y="52" width="6" height="16" rx="3"/><rect x="18" y="44" width="6" height="32" rx="3"/><rect x="32" y="56" width="6" height="8" rx="3"/><rect x="46" y="38" width="6" height="44" rx="3"/><rect x="60" y="48" width="6" height="24" rx="3"/><rect x="74" y="54" width="6" height="12" rx="3"/><rect x="88" y="40" width="6" height="40" rx="3"/>
+</g>
+<g fill="{{accent}}">
+<rect x="102" y="14" width="6" height="92" rx="3"/><rect x="116" y="26" width="6" height="68" rx="3"/><rect x="130" y="8" width="6" height="104" rx="3"/><rect x="144" y="30" width="6" height="60" rx="3"/>
+</g>
+<g fill="#3A3A4C">
+<rect x="158" y="50" width="6" height="20" rx="3"/><rect x="172" y="42" width="6" height="36" rx="3"/><rect x="186" y="56" width="6" height="8" rx="3"/><rect x="200" y="46" width="6" height="28" rx="3"/><rect x="214" y="52" width="6" height="16" rx="3"/>
+</g>
+<g fill="#6B4BF0">
+<rect x="228" y="24" width="6" height="72" rx="3"/><rect x="242" y="12" width="6" height="96" rx="3"/><rect x="256" y="30" width="6" height="60" rx="3"/>
+</g>
+<g fill="#3A3A4C">
+<rect x="270" y="48" width="6" height="24" rx="3"/><rect x="284" y="54" width="6" height="12" rx="3"/><rect x="298" y="40" width="6" height="40" rx="3"/><rect x="312" y="50" width="6" height="20" rx="3"/>
+</g>
+<g fill="#FF4D8D">
+<rect x="326" y="20" width="6" height="80" rx="3"/><rect x="340" y="6" width="6" height="108" rx="3"/><rect x="354" y="28" width="6" height="64" rx="3"/>
+</g>
+<g fill="#3A3A4C"><rect x="368" y="52" width="6" height="16" rx="3"/><rect x="382" y="46" width="6" height="28" rx="3"/></g>
+</svg>
+<div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:20px">
+<span style="background:{{accent}};color:#0B0B10;padding:8px 14px;border-radius:999px;font-size:14px;font-weight:600">Risas · 00:42</span>
+<span style="background:#6B4BF0;color:#fff;padding:8px 14px;border-radius:999px;font-size:14px;font-weight:600">Gritos · 01:15</span>
+<span style="background:#FF4D8D;color:#0B0B10;padding:8px 14px;border-radius:999px;font-size:14px;font-weight:600">"No puede ser" · 02:03</span>
+</div>
+<div style="margin-top:24px;padding:16px 20px;border-radius:18px;background:#0B0B10;border:1px solid #2A2A38;display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:15px;color:#B8B8C4">
+<span>3 clips listos</span>
+<span style="color:{{accent}};font-weight:600">Descargar</span>
+</div>
+</div>
+</div>
+</div>
+
+<!-- PLATAFORMAS -->
+<div style="margin-top:40px;border-top:1px solid #1F1F2A;border-bottom:1px solid #1F1F2A;padding:20px 24px;display:flex;flex-wrap:wrap;gap:12px 48px;justify-content:center;font-family:'Space Grotesk',sans-serif;font-weight:500;font-size:20px;color:#B8B8C4">
+<span>YouTube</span><span>Twitch</span><span>Kick</span><span>Directos y videos</span><span>Archivos de tu PC</span>
+</div>
+
+<!-- FUNCIONES -->
+<div id="funciones" style="max-width:1200px;margin:0 auto;padding:110px 24px 40px;box-sizing:border-box">
+<h2 style="margin:0 0 48px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:52px;letter-spacing:-0.02em;max-width:720px;line-height:1.05">Tú eliges qué es un buen momento. Nosotros lo encontramos.</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px">
+<div class="card" style="background:#14141C;border-radius:28px;padding:36px;box-sizing:border-box">
+<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 12h2M7 7v10M11 4v16M15 8v8M19 10v4M22 12h-1"/></svg>
+<h3 style="margin:24px 0 10px;font-family:'Space Grotesk',sans-serif;font-size:26px">Detección acústica</h3>
+<p style="margin:0;color:#B8B8C4;line-height:1.55">Risas, aplausos, ovaciones, gritos, llanto, música, explosiones y picos de volumen. Activa solo los sonidos que importan.</p>
+</div>
+<div class="card" style="background:#6B4BF0;border-radius:28px;padding:36px;box-sizing:border-box">
+<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+<h3 style="margin:24px 0 10px;font-family:'Space Grotesk',sans-serif;font-size:26px;color:#fff">Palabras y nombres</h3>
+<p style="margin:0;color:#fff;line-height:1.55">Escribe frases como "golazo" o "no puede ser". Cuando alguien las diga, el momento se guarda. Ignora mayúsculas y acentos.</p>
+</div>
+<div class="card" style="background:#14141C;border-radius:28px;padding:36px;box-sizing:border-box">
+<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M6.3 6.3a8 8 0 0 0 0 11.4M17.7 6.3a8 8 0 0 1 0 11.4"/></svg>
+<h3 style="margin:24px 0 10px;font-family:'Space Grotesk',sans-serif;font-size:26px">Directos sin cortes</h3>
+<p style="margin:0;color:#B8B8C4;line-height:1.55">Clipea mientras el directo sigue en marcha, en Twitch, Kick o YouTube. Sin perderte nada.</p>
+</div>
+<div class="card" style="background:#14141C;border-radius:28px;padding:36px;box-sizing:border-box">
+<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="4" width="8" height="7" rx="1.5"/><rect x="13" y="4" width="8" height="7" rx="1.5"/><rect x="3" y="13" width="8" height="7" rx="1.5"/><rect x="13" y="13" width="8" height="7" rx="1.5"/></svg>
+<h3 style="margin:24px 0 10px;font-family:'Space Grotesk',sans-serif;font-size:26px">Modo 6 pantallas</h3>
+<p style="margin:0;color:#B8B8C4;line-height:1.55">Vigila varios directos a la vez desde un solo panel y deja que ClipRadar escuche por ti.</p>
+</div>
+<div class="card" style="background:#FF4D8D;border-radius:28px;padding:36px;box-sizing:border-box">
+<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0B0B10" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h14"/></svg>
+<h3 style="margin:24px 0 10px;font-family:'Space Grotesk',sans-serif;font-size:26px;color:#0B0B10">Subtítulos automáticos</h3>
+<p style="margin:0;color:#0B0B10;line-height:1.55">Cada clip sale con subtítulos, para que se lea aunque el video se vea sin sonido.</p>
+</div>
+<div class="card" style="background:#14141C;border-radius:28px;padding:36px;box-sizing:border-box">
+<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 3v12M7 11l5 5 5-5M5 20h14"/></svg>
+<h3 style="margin:24px 0 10px;font-family:'Space Grotesk',sans-serif;font-size:26px">Full HD, sin marca de agua</h3>
+<p style="margin:0;color:#B8B8C4;line-height:1.55">Descarga tus clips a 1080p, listos para subir a tus redes.</p>
+</div>
+</div>
+</div>
+
+<!-- PARA QUE LO USAN -->
+<div style="max-width:1200px;margin:0 auto;padding:90px 24px 40px;box-sizing:border-box">
+<h2 style="margin:0 0 12px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:52px;letter-spacing:-0.02em;line-height:1.05">Hecho para el contenido que más se clipea.</h2>
+<p style="margin:0 0 40px;color:#B8B8C4;font-size:18px">Ejemplos de uso. Configura los sonidos y palabras según lo que quieras cazar.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px">
+<div class="card" style="background:#14141C;border:1px solid #2A2A38;border-radius:32px;padding:40px;box-sizing:border-box">
+<h3 style="margin:0;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:56px;line-height:1;color:{{accent}};letter-spacing:-0.02em">GTA V</h3>
+<p style="margin:16px 0 24px;color:#B8B8C4;font-size:18px;line-height:1.5">Persecuciones, explosiones y momentos épicos de tus partidas y directos, cortados al instante.</p>
+<div style="display:flex;flex-wrap:wrap;gap:10px">
+<span style="border:1px solid {{accent}};color:{{accent}};padding:8px 14px;border-radius:999px;font-size:14px;font-weight:600">Explosión / disparos</span>
+<span style="border:1px solid {{accent}};color:{{accent}};padding:8px 14px;border-radius:999px;font-size:14px;font-weight:600">Gritos</span>
+<span style="border:1px solid {{accent}};color:{{accent}};padding:8px 14px;border-radius:999px;font-size:14px;font-weight:600">Pico de volumen</span>
+</div>
+</div>
+<div class="card" style="background:#14141C;border:1px solid #2A2A38;border-radius:32px;padding:40px;box-sizing:border-box">
+<h3 style="margin:0;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:56px;line-height:1;color:#FF6FA3;letter-spacing:-0.02em">La Casa de Alofoke 3</h3>
+<p style="margin:16px 0 24px;color:#B8B8C4;font-size:18px;line-height:1.5">Risas, discusiones y frases que se hacen virales, detectadas por sonido y por las palabras que tú elijas.</p>
+<div style="display:flex;flex-wrap:wrap;gap:10px">
+<span style="border:1px solid #FF6FA3;color:#FF6FA3;padding:8px 14px;border-radius:999px;font-size:14px;font-weight:600">Risas</span>
+<span style="border:1px solid #FF6FA3;color:#FF6FA3;padding:8px 14px;border-radius:999px;font-size:14px;font-weight:600">Gritos</span>
+<span style="border:1px solid #FF6FA3;color:#FF6FA3;padding:8px 14px;border-radius:999px;font-size:14px;font-weight:600">Palabras clave</span>
+</div>
+</div>
+</div>
+</div>
+
+<!-- COMO -->
+<div id="como" style="max-width:1200px;margin:0 auto;padding:90px 24px 40px;box-sizing:border-box">
+<h2 style="margin:0 0 48px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:52px;letter-spacing:-0.02em;line-height:1.05">Tres pasos. Cero edición.</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px">
+<div style="border-top:3px solid {{accent}};padding-top:24px">
+<div style="font-family:'Space Grotesk',sans-serif;font-size:64px;font-weight:700;color:{{accent}};line-height:1">01</div>
+<h3 style="margin:16px 0 8px;font-family:'Space Grotesk',sans-serif;font-size:24px">Pega el enlace</h3>
+<p style="margin:0;color:#B8B8C4;line-height:1.55">De YouTube, Twitch o Kick, en video o en vivo. También puedes subir un archivo.</p>
+</div>
+<div style="border-top:3px solid #6B4BF0;padding-top:24px">
+<div style="font-family:'Space Grotesk',sans-serif;font-size:64px;font-weight:700;color:#A38FFF;line-height:1">02</div>
+<h3 style="margin:16px 0 8px;font-family:'Space Grotesk',sans-serif;font-size:24px">Elige qué buscar</h3>
+<p style="margin:0;color:#B8B8C4;line-height:1.55">Marca los sonidos y escribe las palabras que disparan un clip.</p>
+</div>
+<div style="border-top:3px solid #FF4D8D;padding-top:24px">
+<div style="font-family:'Space Grotesk',sans-serif;font-size:64px;font-weight:700;color:#FF6FA3;line-height:1">03</div>
+<h3 style="margin:16px 0 8px;font-family:'Space Grotesk',sans-serif;font-size:24px">Descarga tus clips</h3>
+<p style="margin:0;color:#B8B8C4;line-height:1.55">Pulsa "Empezar a clipear" y recibe cada momento ya cortado.</p>
+</div>
+</div>
+</div>
+
+<!-- PLANES -->
+<div id="planes" style="max-width:1200px;margin:0 auto;padding:110px 24px 40px;box-sizing:border-box">
+<h2 style="margin:0 0 12px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:52px;letter-spacing:-0.02em;line-height:1.05">Empieza gratis. Crece cuando quieras.</h2>
+<p style="margin:0 0 44px;color:#B8B8C4;font-size:18px">Precios en pesos dominicanos (RD$) con su equivalente en USD.</p>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;align-items:stretch">
+
+<div style="background:#14141C;border:1px solid #2A2A38;border-radius:28px;padding:36px;box-sizing:border-box;display:flex;flex-direction:column">
+<div style="font-weight:600;font-size:18px">Prueba gratuita</div>
+<div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:44px;margin:16px 0 24px">Gratis</div>
+<ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;color:#B8B8C4;line-height:1.4;flex:1">
+<li>3 clips completos</li><li>Detección acústica (risas, gritos)</li><li>Subtítulos automáticos</li>
+</ul>
+<a class="btn" href="#contacto" style="margin-top:32px;text-align:center;border:1px solid #8A8A9C;padding:16px;border-radius:999px;font-weight:600">Probar gratis</a>
+</div>
+
+<div style="background:#14141C;border:2px solid {{accent}};border-radius:28px;padding:36px;box-sizing:border-box;display:flex;flex-direction:column;position:relative">
+<span style="position:absolute;top:-14px;right:24px;background:{{accent}};color:#0B0B10;font-size:12px;font-weight:700;letter-spacing:.06em;padding:6px 12px;border-radius:8px">POPULAR</span>
+<div style="font-weight:600;font-size:18px">Pro mensual</div>
+<div style="margin:16px 0 24px"><span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:44px">RD$ 990</span> <span style="color:#B8B8C4;font-size:15px">/ mes ($17 USD)</span></div>
+<ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;color:#B8B8C4;line-height:1.4;flex:1">
+<li style="color:#F4F4F6;font-weight:600">Clips ilimitados</li><li>Calidad Full HD 1080p</li><li>Directos en vivo sin cortes</li><li>Soporte VIP por WhatsApp</li>
+</ul>
+<a class="btn" href="#contacto" style="margin-top:32px;text-align:center;background:{{accent}};color:#0B0B10;padding:16px;border-radius:999px;font-weight:600">Elegir Pro</a>
+</div>
+
+<div style="background:#14141C;border:1px solid #2A2A38;border-radius:28px;padding:36px;box-sizing:border-box;display:flex;flex-direction:column;position:relative">
+<span style="position:absolute;top:-14px;right:24px;background:#F2B84B;color:#0B0B10;font-size:12px;font-weight:700;letter-spacing:.06em;padding:6px 12px;border-radius:8px">VITALICIO</span>
+<div style="font-weight:600;font-size:18px">VIP de por vida</div>
+<div style="margin:16px 0 24px"><span style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:44px">RD$ 2,490</span> <span style="color:#B8B8C4;font-size:15px">pago único ($39 USD)</span></div>
+<ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;color:#B8B8C4;line-height:1.4;flex:1">
+<li style="color:#F4F4F6;font-weight:600">Acceso de por vida</li><li>Sin mensualidades jamás</li><li>Actualizaciones incluidas</li><li>Prioridad en cola</li>
+</ul>
+<a class="btn" href="#contacto" style="margin-top:32px;text-align:center;background:#F2B84B;color:#0B0B10;padding:16px;border-radius:999px;font-weight:600">Comprar de por vida</a>
+</div>
+</div>
+</div>
+
+<!-- CTA -->
+<div id="contacto" style="max-width:1200px;margin:90px auto 0;padding:0 24px;box-sizing:border-box">
+<div style="background:{{accent}};color:#0B0B10;border-radius:40px;padding:72px 48px;text-align:center">
+<h2 style="margin:0 auto;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:64px;letter-spacing:-0.03em;line-height:1;max-width:760px">Deja de buscar el momento. Que te encuentre a ti.</h2>
+<p style="margin:24px auto 0;font-size:20px;max-width:520px;line-height:1.5">Pega tu primer enlace y prueba ClipRadar con 3 clips gratis.</p>
+<div style="display:flex;flex-wrap:wrap;gap:16px;justify-content:center;margin-top:36px">
+<a class="btn" href="http://localhost:8787" style="background:#0B0B10;color:#fff;padding:20px 40px;border-radius:999px;font-weight:600;font-size:18px">Empezar a clipear</a>
+<a class="btn" href="http://localhost:8787/multi" style="border:2px solid #0B0B10;color:#0B0B10;padding:18px 38px;border-radius:999px;font-weight:600;font-size:18px">Modo 6 pantallas</a>
+</div>
+<p style="margin:24px 0 0;font-size:16px">¿Dudas? <a href="mailto:creamix92@gmail.com" style="font-weight:700;text-decoration:underline;display:inline-block;padding:12px 4px">creamix92@gmail.com</a></p>
+</div>
+</div>
+
+</main>
+<!-- FOOTER -->
+<div role="contentinfo" style="max-width:1200px;margin:0 auto;padding:48px 24px;display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;color:#8E8E9C;font-size:14px;box-sizing:border-box">
+<span style="font-family:'Space Grotesk',sans-serif;font-weight:700;color:#F4F4F6;font-size:18px">Clip<span style="color:{{accent}}">Radar</span></span>
+<span>© 2026 ClipRadar. Todos los derechos reservados.</span>
+<span style="flex:1 1 100%;font-size:13px;line-height:1.5">ClipRadar no está afiliado ni respaldado por Rockstar Games, Take-Two ni La Casa de Alofoke. Las marcas pertenecen a sus dueños. Usa ClipRadar con contenido propio o con permiso de su dueño.</span>
+</div>
+
+<!-- ANUNCIO: TARJETA -->
+<sc-if value="{{showPromo}}" hint-placeholder-val="{{ false }}">
+<div role="region" aria-label="Oferta VIP de por vida" style="position:fixed;right:20px;bottom:20px;width:320px;max-width:calc(100% - 40px);background:#14141C;border:1px solid #F2B84B;border-radius:24px;padding:24px;box-sizing:border-box;box-shadow:0 20px 60px rgba(0,0,0,.6);z-index:50">
+<span style="display:inline-block;background:#F2B84B;color:#0B0B10;font-size:12px;font-weight:700;letter-spacing:.06em;padding:5px 10px;border-radius:8px">VITALICIO</span>
+<h3 style="margin:14px 0 6px;font-family:'Space Grotesk',sans-serif;font-size:24px;line-height:1.15">Paga una vez. Clipea para siempre.</h3>
+<p style="margin:0;color:#B8B8C4;font-size:15px;line-height:1.5">VIP de por vida por RD$ 2,490 (≈$39 USD). Sin mensualidades y con prioridad en cola.</p>
+<div style="display:flex;gap:10px;margin-top:18px;align-items:center">
+<a href="#planes" onClick="{{ closePromo }}" style="flex:1;text-align:center;background:#F2B84B;color:#0B0B10;padding:13px;border-radius:999px;font-weight:600;font-size:15px">Ver plan VIP</a>
+<button onClick="{{ closePromo }}" style="min-height:44px;padding:0 16px;border:1px solid #8A8A9C;background:transparent;color:#F4F4F6;border-radius:999px;font-size:15px;cursor:pointer;font-family:inherit">Pasar</button>
+</div>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#C6FF3D","options":["#C6FF3D","#3DFFD0","#FFD23D","#FF6B3D"]},"$preview":{"width":1280,"height":3300}}'>
+class Component extends DCLogic {
+state = { bar: true, promo: false };
+componentDidMount() {
+this.t = setTimeout(() => this.setState({ promo: true }), 5000);
+}
+componentWillUnmount() {
+clearTimeout(this.t);
+}
+renderVals() {
+return {
+accent: this.props.accent ?? '#C6FF3D',
+showBar: this.state.bar,
+showPromo: this.state.promo,
+closeBar: () => this.setState({ bar: false }),
+closePromo: () => { clearTimeout(this.t); this.setState({ promo: false }); }
+};
+}
+}
+</script>
+</body>
+</html>
