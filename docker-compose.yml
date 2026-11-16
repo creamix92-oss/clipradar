@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  clipradar:
+    build: .
+    container_name: clipradar
+    restart: always
+    ports:
+      - "8787:8787"
+    environment:
+      - CLIPRADAR_HOST=0.0.0.0
+      - CLIPRADAR_PORT=8787
+      - CLIPRADAR_DATA=/app/data
+      - CLIPRADAR_CLEANUP_SOURCE=1
+      - CLIPRADAR_ADMIN_EMAIL=${CLIPRADAR_ADMIN_EMAIL:-admin@clipradar.com}
+      # La contraseña va en el archivo .env (ver .env.example). Sin ella, el servidor no arranca.
+      - CLIPRADAR_ADMIN_PASS=${CLIPRADAR_ADMIN_PASS:?Crea el archivo .env con CLIPRADAR_ADMIN_PASS=una-contraseña-larga}
+    volumes:
+      # Datos persistentes: base de datos SQLite, modelos IA descargados y clips
+      - ./data:/app/data

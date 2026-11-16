@@ -1,0 +1,13 @@
+.venv/
+data/
+.env
+__pycache__/
+*.pyc
+diagnostico.txt
+cloudflared.exe
+_oracle_ssh/
+*.key
+*.pem
+*.log
+web.bak*
+README.md.bak

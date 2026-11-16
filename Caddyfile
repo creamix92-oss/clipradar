@@ -1,0 +1,7 @@
+# Configuración de Dominio y SSL Automático (HTTPS) con Caddy
+# Reemplaza "tudominio.com" por el dominio que compres (ej. clipradar.app)
+# Caddy emitirá el certificado SSL de Let's Encrypt automáticamente y gratis.
+
+# tudominio.com {
+#     reverse_proxy localhost:8787
+# }
