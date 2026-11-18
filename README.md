@@ -23,6 +23,7 @@ Todo corre en tu máquina o servidor. No usa APIs de pago ni sube tus videos a n
 | 😂 Risas, 👏 aplausos, 🙌 ovación, 😱 gritos, 🎵 música, 😭 llanto, 💥 explosiones | Modelo YAMNet (521 sonidos de AudioSet) |
 | 🗣️ Palabras, frases o nombres | Transcripción con Whisper; ignora mayúsculas/acentos y tolera pequeños errores |
 | 🔥 Pico de volumen | Detector propio: sonido muy por encima del nivel de fondo |
+| 💬 El chat explota | Ráfagas de mensajes muy por encima del ritmo normal del chat (YouTube y Twitch; videos y repeticiones). Casilla «Usar el chat». Kick no está soportado |
 
 Cada disparo guarda *N* segundos antes y *M* después (configurable). Los disparos cercanos se
 funden en un solo clip, y en videos grabados se quedan los mejores.
@@ -45,6 +46,12 @@ Se abre `http://localhost:8787`. La primera vez que uses sonidos o voz se descar
 2. Marca los sonidos y añade palabras clave.
 3. *Empezar a clipear*. Cada clip se puede reproducir, retitular (re-renderiza), descargar o borrar.
    En videos grabados también puedes crear clips manuales por rango (`1:23` → `1:50`).
+
+## Recibir los clips en el móvil (solo publicar)
+
+Si pones en `.env` `CLIPRADAR_TELEGRAM_TOKEN` + `CLIPRADAR_TELEGRAM_CHAT_ID` (o `CLIPRADAR_DISCORD_WEBHOOK`),
+cada clip terminado te llega con su título y puntaje, listo para publicar. Sin esas variables no hace nada.
+Los clips manuales no se envían. El «puntaje» es una estimación de la app, no una predicción de visitas.
 
 ## Ajustes (variables de entorno)
 

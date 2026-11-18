@@ -16,7 +16,8 @@ from pathlib import Path
 
 import numpy as np
 
-from . import ff
+from . import ff, notify
+from .chat_events import detect_chat_spikes, fetch_chat_times
 from .audio_events import SOUND_GROUPS, Hit, detect_hype, detect_sounds, yamnet_status
 from .config import JOBS_DIR, SAMPLE_RATE
 from .moments import Moment, build_moments, make_title
@@ -27,6 +28,7 @@ DEFAULTS = {
     "keywords": [],  # palabras, frases o nombres
     "sounds": ["risas", "aplausos"],  # grupos de SOUND_GROUPS
     "hype": True,  # picos de volumen
+    "chat": False,  # picos de mensajes del chat (solo videos/repeticiones de YouTube y Twitch)
     "sensitivity": 0.5,
     "pre": 10.0,  # segundos antes del disparo (contexto del suceso)
     "post": 20.0,  # segundos después (reacción, remate y euforia)
@@ -344,6 +346,15 @@ class Job:
             t += CHUNK_SECONDS
         if self.stop_event.is_set():
             return
+        if s["chat"] and not self.local_file:
+            self.say("Leyendo el chat para ver cuándo explotó…", "analyzing", 0.68)
+            times, why = fetch_chat_times(self.url)
+            if times:
+                found = detect_chat_spikes(times, s["sensitivity"])
+                hits += found
+                self.say(f"Chat: {len(times)} mensajes, {len(found)} picos.")
+            else:
+                self.say("⚠ No pude leer el chat (" + (why or "sin mensajes") + "). Sigo con audio y palabras.")
         moments = build_moments(hits, s["pre"], s["post"], s["max_len"], total, min_len=s.get("min_len", 30.0))
         moments = sorted(sorted(moments, key=lambda m: -m.score)[: s["max_clips"]], key=lambda m: m.start)
         if not moments:
@@ -406,6 +417,7 @@ class Job:
             except Exception:
                 pass
         self.save()
+        notify.send_async(self.dir / clip["file"], clip, self.url if str(self.url).startswith("http") else "")
         return clip
 
     def _render(self, clip: dict) -> None:

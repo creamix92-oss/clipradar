@@ -269,6 +269,7 @@ body.embedded #pills{display:none}
         <label class="check"><input id="show_title" type="checkbox"> Título + emoji en el video</label>
         <label class="check"><input id="captions" type="checkbox"> Subtítulos quemados</label>
         <label class="check"><input id="smart_titles" type="checkbox"> Titular con lo que se dijo</label>
+        <label class="check"><input id="chat" type="checkbox"> Usar el chat (YouTube/Twitch, videos y repeticiones)</label>
       </div>
     </details>
 
@@ -538,7 +539,7 @@ function updateUserUI(u) {
 }
 
 /* ---------- formulario ---------- */
-const NUM = ['pre', 'post', 'min_len', 'max_len', 'max_clips', 'sensitivity'], SEL = ['layout', 'language', 'whisper_model', 'quality'], CHK = ['show_title', 'captions', 'smart_titles'];
+const NUM = ['pre', 'post', 'min_len', 'max_len', 'max_clips', 'sensitivity'], SEL = ['layout', 'language', 'whisper_model', 'quality'], CHK = ['show_title', 'captions', 'smart_titles', 'chat'];
 let state = {mode: 'auto', sounds: [], hype: true, keywords: []};
 let KINDS = {palabra: {emoji: '🗣️', label: 'Palabra clave'}, manual: {emoji: '🎬', label: 'Manual'}};
 

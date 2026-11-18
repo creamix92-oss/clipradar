@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from .audio_events import HYPE, SOUND_GROUPS, Hit
 from .speech import Word
 
-KIND_WEIGHT = {"palabra": 1.6, "risas": 1.2, "aplausos": 1.1, "ovacion": 1.1, "gritos": 1.1, "hype": 0.8}
+KIND_WEIGHT = {"chat": 1.4, "palabra": 1.6, "risas": 1.2, "aplausos": 1.1, "ovacion": 1.1, "gritos": 1.1, "hype": 0.8}
 
 
 @dataclass
@@ -74,6 +74,8 @@ def build_moments(
 
 
 def emoji_for(kind: str) -> str:
+    if kind == "chat":
+        return "💬"
     if kind == "palabra":
         return "🗣️"
     if kind == "hype":
@@ -84,6 +86,8 @@ def emoji_for(kind: str) -> str:
 
 
 def label_for(kind: str) -> str:
+    if kind == "chat":
+        return "El chat explotó"
     if kind == "palabra":
         return "Palabra clave"
     if kind == "hype":
@@ -94,6 +98,11 @@ def label_for(kind: str) -> str:
 
 
 _VIRAL_HOOKS = {
+    "chat": [
+        "¡EL CHAT EXPLOTÓ CON ESTO! 💬",
+        "¡TODO EL CHAT REACCIONÓ AL MISMO TIEMPO! 🔥",
+        "¡EL CHAT SE VOLVIÓ LOCO! 🚨",
+    ],
     "hype": [
         "¡TIENES QUE VER ESTO! 🔥",
         "¡NO VAS A CREER LO QUE PASÓ! 😱",
